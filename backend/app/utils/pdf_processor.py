@@ -4,10 +4,40 @@ from typing import Tuple, List, Dict
 from fastapi import UploadFile, HTTPException
 import base64
 from io import BytesIO
+from app.core.config import get_settings
+
+settings = get_settings()
+
+async def validate_file(file: UploadFile) -> None:
+    """Validate the uploaded file."""
+    # Check file type
+    if file.content_type not in settings.ALLOWED_FILE_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid file type. Allowed types: {', '.join(settings.ALLOWED_FILE_TYPES)}"
+        )
+    
+    # Check file size
+    file_size = 0
+    chunk_size = 1024 * 1024  # 1MB chunks
+    
+    while chunk := await file.read(chunk_size):
+        file_size += len(chunk)
+        if file_size > settings.MAX_UPLOAD_SIZE:
+            raise HTTPException(
+                status_code=400,
+                detail=f"File size exceeds maximum limit of {settings.MAX_UPLOAD_SIZE / (1024 * 1024)}MB"
+            )
+    
+    # Reset file pointer
+    await file.seek(0)
 
 async def save_upload_file(upload_file: UploadFile, upload_dir: str) -> str:
     """Save the uploaded file to the specified directory."""
     try:
+        # Validate file before saving
+        await validate_file(upload_file)
+        
         # Create the upload directory if it doesn't exist
         os.makedirs(upload_dir, exist_ok=True)
         
@@ -20,6 +50,8 @@ async def save_upload_file(upload_file: UploadFile, upload_dir: str) -> str:
             f.write(content)
             
         return file_path
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error saving file: {str(e)}")
 

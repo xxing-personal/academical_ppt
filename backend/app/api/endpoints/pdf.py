@@ -1,40 +1,32 @@
 import os
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from app.schemas.pdf import PDFUploadResponse
+from app.schemas.pdf import PDFResponse
 from app.utils.pdf_processor import save_upload_file, extract_text_from_pdf
+from app.core.config import get_settings
 
 router = APIRouter()
+settings = get_settings()
 
-@router.post("/upload_pdf", response_model=PDFUploadResponse)
+@router.post("/upload", response_model=PDFResponse)
 async def upload_pdf(file: UploadFile = File(...)):
-    # Validate file type
-    if not file.filename.lower().endswith('.pdf'):
-        raise HTTPException(
-            status_code=400,
-            detail="Only PDF files are allowed"
-        )
-    
-    # Get the upload directory path
-    upload_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
-    
+    """
+    Upload a PDF file and extract its text and images.
+    """
     try:
         # Save the uploaded file
+        upload_dir = os.path.join(settings.UPLOAD_DIR, "pdfs")
         file_path = await save_upload_file(file, upload_dir)
         
-        # Extract text and images from the PDF
+        # Process the PDF
         text, num_pages, images = extract_text_from_pdf(file_path)
         
-        return PDFUploadResponse(
+        return PDFResponse(
             filename=file.filename,
             text=text,
             num_pages=num_pages,
-            images=images,
-            message="PDF processed successfully"
+            images=images
         )
-    except HTTPException as e:
-        raise e
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"An error occurred while processing the PDF: {str(e)}"
-        ) 
+        raise HTTPException(status_code=500, detail=str(e)) 
