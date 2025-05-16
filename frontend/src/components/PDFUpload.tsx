@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
-import PresentationOutline from './PresentationOutline';
+import ReadingPage from './ReadingPage';
 import type { PresentationResponse } from '../types/presentation';
 import './PDFUpload.css';
 
@@ -9,6 +9,7 @@ const PDFUpload = () => {
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [presentation, setPresentation] = useState<PresentationResponse | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<string>('');
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -21,6 +22,7 @@ const PDFUpload = () => {
       setFile(selectedFile);
       setError('');
       setPresentation(null);
+      setPdfUrl(URL.createObjectURL(selectedFile));
     }
   };
 
@@ -60,6 +62,10 @@ const PDFUpload = () => {
     }
   };
 
+  if (presentation) {
+    return <ReadingPage pdfUrl={pdfUrl} presentation={presentation} />;
+  }
+
   return (
     <div className="pdf-upload-container">
       <h2>PDF Presentation Generator</h2>
@@ -86,13 +92,6 @@ const PDFUpload = () => {
         <div className="error-message">
           {error}
         </div>
-      )}
-
-      {presentation && (
-        <PresentationOutline
-          title={presentation.content.title}
-          slides={presentation.content.slides}
-        />
       )}
     </div>
   );

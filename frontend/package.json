@@ -8,7 +8,10 @@
     "build": "tsc -b && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "test": "jest"
+    "test": "jest",
+    "slidev": "slidev",
+    "slidev:build": "slidev build",
+    "slidev:export": "slidev export"
   },
   "dependencies": {
     "@types/axios": "^0.9.36",
@@ -18,6 +21,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
+    "@slidev/cli": "^51.6.0",
+    "@slidev/theme-default": "^0.25.0",
     "@tailwindcss/postcss": "^4.1.6",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",

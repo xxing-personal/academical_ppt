@@ -11,4 +11,5 @@ export interface PresentationContent {
 export interface PresentationResponse {
   content: PresentationContent;
   message: string;
+  slidev_url: string;
 } 

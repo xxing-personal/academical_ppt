@@ -1,0 +1,22 @@
+.reading-page {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.pdf-container,
+.slides-container {
+  flex: 0 0 50%;
+  min-width: 0;
+  max-width: 50%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.pdf-viewer,
+.slides-viewer {
+  width: 100%;
+  height: 100%;
+  border: none;
+} 
