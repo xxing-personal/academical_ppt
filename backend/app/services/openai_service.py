@@ -65,10 +65,11 @@ def start_slidev_server(slides_md_path: str) -> tuple[subprocess.Popen, int]:
 
 def get_slidev_output_path(presentation_title: str) -> str:
     base_dir = Path("backend/slidev_output/public")
-    base_dir.mkdir(parents=True, exist_ok=True)
     safe_title = "".join(c if c.isalnum() else "_" for c in presentation_title)
-    slides_md_path = base_dir / f"{safe_title}_slides.md"
-    return str(slides_md_path) 
+    paper_dir = base_dir / safe_title
+    paper_dir.mkdir(parents=True, exist_ok=True)
+    slides_md_path = paper_dir / "slides.md"
+    return str(slides_md_path)
 
 def generate_slidev_markdown(presentation: PresentationContent) -> str:
     """Generate Slidev markdown content from presentation data."""
