@@ -51,11 +51,12 @@ def start_slidev_server(slides_md_path: str) -> tuple[subprocess.Popen, int]:
     # Start Slidev server in the output directory
     output_dir = os.path.dirname(slides_md_path)
     process = subprocess.Popen(
-        ['slidev', os.path.basename(slides_md_path), '--port', str(port)],
+        ['npx', 'slidev', os.path.basename(slides_md_path), '--port', str(port)],
         cwd=output_dir,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
+        env={**os.environ, 'NODE_ENV': 'development'}
     )
     
     # Store the process
