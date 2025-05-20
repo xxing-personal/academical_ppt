@@ -56,16 +56,11 @@ async def generate_presentation(file: UploadFile = File(...)):
         
         return PresentationResponse(
             content=presentation_content,
-            message=f"Presentation content generated successfully. View it at: {slidev_url}"
+            message=f"Presentation content generated successfully. View it at: {slidev_url}",
+            slidev_url=slidev_url
         )
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-def get_slidev_output_path(presentation_title: str) -> str:
-    base_dir = Path("backend/slidev_output/public")
-    base_dir.mkdir(parents=True, exist_ok=True)
-    safe_title = "".join(c if c.isalnum() else "_" for c in presentation_title)
-    slides_md_path = base_dir / f"{safe_title}_slides.md"
-    return str(slides_md_path) 

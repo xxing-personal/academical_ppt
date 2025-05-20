@@ -11,4 +11,5 @@ class PresentationContent(BaseModel):
 
 class PresentationResponse(BaseModel):
     content: PresentationContent
-    message: str = "Presentation content generated successfully" 
+    message: str = "Presentation content generated successfully"
+    slidev_url: str 
