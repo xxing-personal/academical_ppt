@@ -5,64 +5,10 @@ import json
 import os
 import shutil
 from pathlib import Path
-import subprocess
-import socket
-import psutil
-import atexit
-from typing import Dict, Optional
+from typing import Dict
 
 settings = get_settings()
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
-
-# Global dictionary to track running Slidev processes
-running_slidev_processes: Dict[str, subprocess.Popen] = {}
-
-def find_available_port(start_port: int = 3030, max_port: int = 3130) -> int:
-    """Find an available port in the given range."""
-    for port in range(start_port, max_port + 1):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            try:
-                s.bind(('localhost', port))
-                return port
-            except OSError:
-                continue
-    raise RuntimeError("No available ports found in the specified range")
-
-def cleanup_slidev_processes():
-    """Cleanup function to terminate all running Slidev processes on application shutdown."""
-    for process in running_slidev_processes.values():
-        try:
-            process.terminate()
-            process.wait(timeout=5)
-        except (subprocess.TimeoutExpired, psutil.NoSuchProcess):
-            try:
-                process.kill()
-            except psutil.NoSuchProcess:
-                pass
-
-# Register cleanup function
-atexit.register(cleanup_slidev_processes)
-
-def start_slidev_server(slides_md_path: str) -> tuple[subprocess.Popen, int]:
-    """Start a Slidev development server in the directory containing the slides.md file."""
-    # Find an available port
-    port = find_available_port()
-    
-    # Start Slidev server in the output directory
-    output_dir = os.path.dirname(slides_md_path)
-    process = subprocess.Popen(
-        ['npx', 'slidev', os.path.basename(slides_md_path), '--port', str(port)],
-        cwd=output_dir,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        env={**os.environ, 'NODE_ENV': 'development'}
-    )
-    
-    # Store the process
-    running_slidev_processes[slides_md_path] = process
-    
-    return process, port
 
 def get_slidev_output_path(presentation_title: str) -> str:
     base_dir = Path("backend/slidev_output/public")
@@ -102,7 +48,7 @@ title: {title}
 
     return markdown
 
-def generate_presentation_content(text: str) -> tuple[PresentationContent, str]:
+def generate_presentation_content(text: str) -> tuple[PresentationContent, bool]:
     prompt = f"""You are an expert presentation creator. Create a structured presentation outline from the following academic paper text.
     The presentation should include:
     1. A clear title
@@ -154,11 +100,7 @@ def generate_presentation_content(text: str) -> tuple[PresentationContent, str]:
         with open(slides_md_path, "w", encoding="utf-8") as f:
             f.write(markdown_content)
         
-        # Start Slidev server
-        process, port = start_slidev_server(slides_md_path)
-        
-        # Return both the presentation content and the URL
-        return presentation, f"http://localhost:{port}"
+        return presentation, True
         
     except Exception as e:
         raise Exception(f"Error generating presentation content: {str(e)}") 
