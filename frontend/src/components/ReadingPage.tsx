@@ -1,29 +1,31 @@
 import React from 'react';
-import type { PresentationResponse } from '../types/presentation';
 import './ReadingPage.css';
 
 interface ReadingPageProps {
   pdfUrl: string;
-  presentation: PresentationResponse;
 }
 
-const ReadingPage: React.FC<ReadingPageProps> = ({ pdfUrl, presentation }) => {
+const ReadingPage: React.FC<ReadingPageProps> = ({ pdfUrl }) => {
   return (
     <div className="reading-page">
-      <div className="pdf-container" style={{margin: 0, padding: 0}}>
+      <div className="pdf-container">
         <iframe
           src={pdfUrl}
           title="PDF Viewer"
           className="pdf-viewer"
-          style={{margin: 0, padding: 0, display: 'block'}}
         />
       </div>
       <div className="slides-container">
+        <h3>Slidev Presentation</h3>
         <iframe
-          src={presentation.slidev_url}
+          src="http://localhost:3030/"
           title="Slides Viewer"
           className="slides-viewer"
         />
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+          <a href="http://localhost:3030/presenter/" target="_blank" rel="noopener noreferrer">Presenter Mode</a>
+          <a href="http://localhost:3030/overview/" target="_blank" rel="noopener noreferrer">Slides Overview</a>
+        </div>
       </div>
     </div>
   );
