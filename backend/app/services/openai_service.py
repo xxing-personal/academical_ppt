@@ -10,6 +10,7 @@ from typing import Dict
 settings = get_settings()
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
+
 def get_slidev_output_path(presentation_title: str) -> str:
     base_dir = Path("backend/slidev_output/public")
     safe_title = "".join(c if c.isalnum() else "_" for c in presentation_title)
@@ -17,6 +18,11 @@ def get_slidev_output_path(presentation_title: str) -> str:
     paper_dir.mkdir(parents=True, exist_ok=True)
     slides_md_path = paper_dir / "slides.md"
     return str(slides_md_path)
+
+def save_active_slides(slides_md_path: str) -> None:
+    """Save a copy of slides.md in the main slidev_output folder as the active slides."""
+    main_slides_path = Path("backend/slidev_output/public/slides.md")
+    shutil.copy2(slides_md_path, main_slides_path)
 
 def generate_slidev_markdown(presentation: PresentationContent) -> str:
     """Generate Slidev markdown content from presentation data."""
@@ -48,7 +54,7 @@ title: {title}
 
     return markdown
 
-def generate_presentation_content(text: str) -> tuple[PresentationContent, bool]:
+def generate_presentation_content(text: str) -> tuple[PresentationContent, bool, str]:
     prompt = f"""You are an expert presentation creator. Create a structured presentation outline from the following academic paper text.
     The presentation should include:
     1. A clear title
@@ -100,7 +106,10 @@ def generate_presentation_content(text: str) -> tuple[PresentationContent, bool]
         with open(slides_md_path, "w", encoding="utf-8") as f:
             f.write(markdown_content)
         
-        return presentation, True
+        # Save a copy as active slides
+        save_active_slides(slides_md_path)
+        
+        return presentation, True, presentation.title
         
     except Exception as e:
         raise Exception(f"Error generating presentation content: {str(e)}") 
